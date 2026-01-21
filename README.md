@@ -12,9 +12,9 @@ Le trafic entrant est distribué intelligemment entre les deux serveurs web.
 
 ```mermaid
 graph LR
-    User((Utilisateur)) -->|HTTP:80| LB[Load Balancer (Nginx)]
-    LB -->|Round Robin| App1[Web Server 1]
-    LB -->|Round Robin| App2[Web Server 2]
+    User((Utilisateur)) -->|HTTP:80| LB["Load Balancer (Nginx)"]
+    LB -->|Round Robin| App1["Web Server 1"]
+    LB -->|Round Robin| App2["Web Server 2"]
     
     style LB fill:#f9f,stroke:#333,stroke-width:2px
     style App1 fill:#667eea,stroke:#333,color:white
@@ -114,7 +114,3 @@ Vous voulez changer les couleurs ou le port ? Tout est dans `group_vars/` !
 
 - **Changer le port du site** : Éditez `http_port` dans `group_vars/webservers.yml`.
 - **Changer la méthode de load balancing** : Éditez `lb_method` dans `group_vars/loadbalancer.yml` (choix : `round_robin`, `least_conn`, `ip_hash`).
-
----
-
-**Contributions bienvenues !** N'hésitez pas à ouvrir une Issue ou une PR.

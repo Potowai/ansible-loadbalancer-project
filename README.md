@@ -2,11 +2,7 @@
 
 Un projet Ansible complet et pédagogique qui déploie automatiquement une architecture **Haute Disponibilité** composée d'un Load Balancer Nginx et de 2 serveurs Web.
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Ansible](https://img.shields.io/badge/ansible-%23EE0000.svg?style=flat&logo=ansible&logoColor=white)
-![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=flat&logo=docker&logoColor=white)
-
-## � Architecture
+## 📊 Architecture
 
 Le trafic entrant est distribué intelligemment entre les deux serveurs web.
 
@@ -16,7 +12,7 @@ graph LR
     LB -->|Round Robin| App1["Web Server 1"]
     LB -->|Round Robin| App2["Web Server 2"]
     
-    style LB fill:#f9f,stroke:#333,stroke-width:2px
+    style LB fill:#e83e8c,stroke:#333,stroke-width:2px,color:white
     style App1 fill:#667eea,stroke:#333,color:white
     style App2 fill:#43e97b,stroke:#333,color:white
 ```

@@ -1,0 +1,50 @@
+services:
+  # Target Server 1
+  web1:
+    build: ./infrastructure
+    container_name: web1
+    hostname: web1
+    networks:
+      - ansible-net
+    ports:
+      - "8081:80"
+
+  # Target Server 2
+  web2:
+    build: ./infrastructure
+    container_name: web2
+    hostname: web2
+    networks:
+      - ansible-net
+    ports:
+      - "8082:80"
+
+  # Load Balancer
+  lb1:
+    build: ./infrastructure
+    container_name: lb1
+    hostname: lb1
+    networks:
+      - ansible-net
+    ports:
+      - "8080:80" # Map LB port 80 to host 8080
+
+  # Control Node (Ansible Controller)
+  control:
+    image: ubuntu:22.04
+    container_name: ansible_control
+    hostname: control
+    networks:
+      - ansible-net
+    volumes:
+      - ./:/ansible
+      - ./keys:/root/.ssh
+    command: tail -f /dev/null # Keep container running
+    depends_on:
+      - web1
+      - web2
+      - lb1
+
+networks:
+  ansible-net:
+    driver: bridge

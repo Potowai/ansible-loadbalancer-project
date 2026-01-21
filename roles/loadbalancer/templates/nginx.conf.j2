@@ -1,0 +1,52 @@
+upstream backend {
+    # Méthode de load balancing
+    {% if lb_method == 'least_conn' %}
+    least_conn;
+    {% elif lb_method == 'ip_hash' %}
+    ip_hash;
+    {% endif %}
+
+    # Serveurs backend
+    {% for server in backend_servers %}
+    server {{ server.ip }}:{{ server.port }} max_fails={{ health_check_fails }} fail_timeout={{ health_check_interval }}s;
+    {% endfor %}
+}
+
+server {
+    listen {{ lb_port }};
+    server_name _;
+
+    access_log /var/log/nginx/loadbalancer_access.log;
+    error_log /var/log/nginx/loadbalancer_error.log;
+
+    location / {
+        proxy_pass http://backend;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # Timeouts
+        proxy_connect_timeout 30s;
+        proxy_send_timeout 30s;
+        proxy_read_timeout 30s;
+        
+        # Retry logic
+        proxy_next_upstream error timeout invalid_header http_500 http_502 http_503;
+    }
+
+    # Health check endpoint
+    location /health {
+        access_log off;
+        return 200 "Load Balancer is healthy\n";
+        add_header Content-Type text/plain;
+    }
+
+    # Status page (optionnel)
+    location /nginx_status {
+        stub_status on;
+        access_log off;
+        allow 127.0.0.1;
+        deny all;
+    }
+}

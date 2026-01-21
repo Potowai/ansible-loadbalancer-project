@@ -1,0 +1,54 @@
+---
+- name: Mise à jour du cache APT
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Installation de Nginx
+  apt:
+    name: nginx
+    state: present
+
+- name: Supprimer la configuration par défaut
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: Reload Nginx
+
+- name: Déployer la configuration du load balancer
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/sites-available/loadbalancer.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Reload Nginx
+
+- name: Activer la configuration du load balancer
+  file:
+    src: /etc/nginx/sites-available/loadbalancer.conf
+    dest: /etc/nginx/sites-enabled/loadbalancer.conf
+    state: link
+  notify: Reload Nginx
+
+- name: S'assurer que Nginx est démarré et activé
+  service:
+    name: nginx
+    state: started
+    enabled: yes
+
+- name: Configurer le firewall pour autoriser HTTP
+  ufw:
+    rule: allow
+    port: "{{ lb_port }}"
+    proto: tcp
+  when: ansible_os_family == "Debian" and ansible_virtualization_type != "docker"
+
+- name: Vérifier la configuration Nginx
+  command: nginx -t
+  register: nginx_test
+  changed_when: false
+
+- name: Afficher le résultat du test Nginx
+  debug:
+    var: nginx_test.stderr_lines

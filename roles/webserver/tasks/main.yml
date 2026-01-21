@@ -1,0 +1,49 @@
+---
+- name: Mise à jour du cache APT
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Installation des packages nécessaires
+  apt:
+    name: "{{ packages }}"
+    state: present
+
+- name: S'assurer que Nginx est démarré et activé
+  service:
+    name: nginx
+    state: started
+    enabled: yes
+
+- name: Créer le répertoire web root
+  file:
+    path: "{{ web_root }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+
+- name: Déployer la page d'accueil personnalisée
+  template:
+    src: index.html.j2
+    dest: "{{ web_root }}/index.html"
+    owner: www-data
+    group: www-data
+    mode: '0644'
+  notify: Restart Nginx
+
+- name: Configurer le firewall pour autoriser HTTP
+  ufw:
+    rule: allow
+    port: "{{ http_port }}"
+    proto: tcp
+  when: ansible_os_family == "Debian" and ansible_virtualization_type != "docker"
+
+- name: Vérifier que Nginx répond
+  uri:
+    url: "http://{{ ansible_default_ipv4.address }}"
+    status_code: 200
+  register: result
+  until: result.status == 200
+  retries: 5
+  delay: 3

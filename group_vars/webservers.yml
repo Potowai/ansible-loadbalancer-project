@@ -1,0 +1,11 @@
+---
+# Configuration des serveurs web
+http_port: 80
+app_name: "Mon Application Web"
+web_root: "/var/www/html"
+
+# Packages à installer
+packages:
+  - nginx
+  - python3-pip
+  - git

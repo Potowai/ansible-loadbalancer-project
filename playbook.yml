@@ -1,0 +1,33 @@
+---
+- name: Configuration des serveurs web
+  hosts: webservers
+  become: yes
+  roles:
+    - webserver
+  tags:
+    - webservers
+
+- name: Configuration du load balancer
+  hosts: loadbalancer
+  become: yes
+  roles:
+    - loadbalancer
+  tags:
+    - loadbalancer
+
+- name: Vérification finale de l'infrastructure
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Message de succès
+      debug:
+        msg:
+          - "=========================================="
+          - "✅ Déploiement terminé avec succès !"
+          - "=========================================="
+          - "Load Balancer: http://{{ hostvars['lb1']['ansible_host'] }}"
+          - "Web Server 1: http://{{ hostvars['web1']['ansible_host'] }}"
+          - "Web Server 2: http://{{ hostvars['web2']['ansible_host'] }}"
+          - "=========================================="
+  tags:
+    - always
